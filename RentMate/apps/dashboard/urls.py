@@ -13,6 +13,7 @@ urlpatterns = [
     path('tenant-home/maintenance/', views.tenant_maintenance_add_view, name='tenant_maintenance'),
     path('tenant/payment/', views.tenant_payment, name='tenant_payment'),
 
+
     # Tenant Maintenance List/Edit/Delete
     path('tenant/maintenance/list/', views.tenant_maintenance_list_view, name='tenant_maintenance_list'),
     path('tenant/maintenance/edit/<int:request_id>/', views.tenant_maintenance_edit_view, name='tenant_maintenance_edit'),
@@ -33,4 +34,5 @@ urlpatterns = [
     #LandLord Proof of Payments
     path('landlord/payments-list/', views.landlord_payments_list_view, name='landlord_payments_list'),
     path('landlord/payments-update/<int:payment_id>/', views.landlord_payments_update_view, name='landlord_payments_update'),
+    path('landlord/payment-approve/<int:payment_id>', views.approve_payment, name='approve_payment'),
 ]

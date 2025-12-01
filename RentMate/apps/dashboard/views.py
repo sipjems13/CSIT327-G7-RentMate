@@ -10,7 +10,7 @@ from datetime import datetime
 from datetime import date
 from decimal import Decimal
 from django.db.models import Q
-
+from django.views.decorators.http import require_POST
 from .forms import TenantRegisterForm, MaintenanceRequestForm, LandlordMaintenanceUpdateForm, PaymentForm
 from .models import Tenant, MaintenanceRequest, Payment
 from django.views.decorators.cache import never_cache
@@ -20,7 +20,7 @@ from django.views.decorators.cache import never_cache
 
 @login_required(login_url='landlord_login')
 def tenant_list_view(request):
-    tenants = Tenant.objects.all()
+    tenants = Tenant.objects.filter(assigned_landlord=request.user)
     query = request.GET.get('q', '').strip()
 
     if query:
@@ -69,6 +69,7 @@ def tenant_register(request):
         form = TenantRegisterForm(request.POST)
         if form.is_valid():
             tenant = form.save(commit=False)
+            tenant.assigned_landlord = request.user
             tenant.is_active = False
             tenant.first_login = True
             tenant.status = 'Inactive'
@@ -381,6 +382,7 @@ def tenant_maintenance_delete_view(request, request_id):
 @never_cache
 @login_required(login_url='landlord_login')
 def home_view(request):
+<<<<<<< HEAD
     try:
         # Count active tenants
         active_tenant_count = Tenant.objects.filter(status="Active").count()
@@ -416,11 +418,15 @@ def home_view(request):
     except Exception as e:
         print(f"Error in home_view: {e}")
         raise
+=======
+    requests = MaintenanceRequest.objects.filter(requester__assigned_landlord=request.user).order_by('-date_requested')
+    pending_count = requests.filter(request_status='Pending').count()
+>>>>>>> upstream/main
 
 
 @login_required(login_url='landlord_login')
 def landlord_maintenance_list_view(request):
-    requests = MaintenanceRequest.objects.all().order_by('-date_requested')
+    requests = MaintenanceRequest.objects.filter(requester__assigned_landlord=request.user).order_by('-date_requested')
     return render(request, 'home_app/landlord-maintenance-list.html', {'requests': requests})
 
 
@@ -463,7 +469,13 @@ def landlord_maintenance_update_view(request, request_id):
 
 @login_required(login_url='landlord_login')
 def landlord_payments_list_view(request):
+<<<<<<< HEAD
     payments = Payment.objects.all().order_by('-created_at')
+=======
+
+    payments = Payment.objects.filter(tenant__assigned_landlord=request.user).order_by('-created_at')
+
+>>>>>>> upstream/main
     return render(request, 'home_app/landlord-payments-list.html', {
         "payments": payments
     })
@@ -482,10 +494,24 @@ def landlord_payments_update_view(request, payment_id):
             payment.save()
             return redirect("landlord_payments_list")
 
+<<<<<<< HEAD
     return render(request, 'home_app/landlord-payments-list-update.html', {
         "payment": payment
     })
 
+=======
+    return render(request, 'home_app/landlord-payments-list-update.html',{
+        "payment": payment,
+    })
+
+@require_POST
+def approve_payment(request,payment_id):
+    payment = get_object_or_404(Payment, id=payment_id)
+    payment.status = "Approved"
+    payment.date_verified = datetime.now().date()
+    payment.save()
+    return redirect('landlord_payments_list')
+>>>>>>> upstream/main
 
 # Landlord - Tenant Profile View
 

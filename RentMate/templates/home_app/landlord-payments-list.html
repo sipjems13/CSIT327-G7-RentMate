@@ -120,7 +120,7 @@
                 <table class="maintenance-table">
                 <tbody>
                     {% for pay in payments %}
-                        <tr>
+                        <tr class="clickable-row" data-href="{% url 'landlord_payments_update' pay.id %}">
                             <td>{{ pay.tenant.first_name }} {{ pay.tenant.last_name }}</td>
                             <td>{{ pay.title }}</td>
                             <td>{{ pay.amount }}</td>
@@ -129,7 +129,12 @@
                             <td class="status {{ pay.status|lower }}">{{ pay.status }}</td>
                             <td>{{ pay.created_at|date:"m-d-Y" }}</td>
                             <td>{{ pay.date_verified|date:"m-d-Y"|default:"-" }}</td>
-                            <td><a href="{% url 'landlord_payments_update' pay.id %}" class="btn-update">Update</a></td>
+                            <td>
+                                <form action="{% url 'approve_payment' pay.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-update">Approve</button>
+                                </form>
+                            </td>
                         </tr>
                     {% empty %}
                         <tr>
@@ -140,5 +145,19 @@
             </table>
         </div>
     </div>
+
+        <script>
+        document.querySelectorAll('.clickable-row').forEach(row => {
+            row.addEventListener('click', function(e) {
+                if (e.target.closest('a, button, .btn-update')) {
+                    return;
+                }
+
+                window.location = this.dataset.href;
+            });
+
+            row.style.cursor = 'pointer';
+        });
+    </script>
 </body>
 </html>

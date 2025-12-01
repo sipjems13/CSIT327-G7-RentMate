@@ -1,7 +1,9 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.models import User
 
 class Tenant(models.Model):
+    assigned_landlord = models.ForeignKey(User, on_delete=models.CASCADE)
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
